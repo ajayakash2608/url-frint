@@ -1,41 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
 
 const URLShortener = () => {
   const [originalUrl, setOriginalUrl] = useState('');
-  const [shortenedUrl, setShortenedUrl] = useState('');
+  const [shortUrl, setShortUrl] = useState('');
   const [error, setError] = useState('');
-  const [dailyCount, setDailyCount] = useState(0);
-  const [monthlyCount, setMonthlyCount] = useState(0);
 
-  useEffect(() => {
-    const fetchCounts = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/url-counts`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
-        );
-        setDailyCount(response.data.dailyCount);
-        setMonthlyCount(response.data.monthlyCount);
-      } catch (err) {
-        console.error('Error fetching counts', err);
-        setError('Error fetching counts');
-      }
-    };
-
-    fetchCounts();
-  }, []);
-
-  const handleShorten = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token'); // Ensure token is available in local storage
+
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/shorten`,
         { originalUrl },
@@ -46,77 +22,39 @@ const URLShortener = () => {
         }
       );
 
-      const { shortUrl } = response.data;
-
-      setShortenedUrl(shortUrl);
-      setDailyCount((prev) => prev + 1);
-      setMonthlyCount((prev) => prev + 1);
-
-      const updateUrlList = async () => {
-        try {
-          await axios.post(
-            `${process.env.REACT_APP_API_URL}/api/add-url-to-list`,
-            { originalUrl, shortUrl },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            }
-          );
-        } catch (err) {
-          console.error('Error updating URL list', err);
-          setError('Error updating URL list');
-        }
-      };
-
-      updateUrlList();
+      setShortUrl(response.data.shortUrl);
+      setError('');
     } catch (err) {
       console.error('Error shortening URL:', err);
-      setError(err.response?.data?.error || 'Error shortening URL');
+      setError('Failed to shorten URL. Please try again.');
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/'; 
-  };
-
   return (
-    <div className="container">
-      <h2>Shorten URL</h2>
-
-      <p>Total URLs created today: {dailyCount}</p>
-      <p>Total URLs created this month: {monthlyCount}</p>
-
-      {/* Form for shortening the URL */}
-      <form onSubmit={handleShorten}>
-        <input
-          type="text"
-          value={originalUrl}
-          onChange={(e) => setOriginalUrl(e.target.value)}
-          placeholder="Enter the long URL"
-          required
-        />
-        <button type="submit">Shorten URL</button>
+    <div>
+      <h1>URL Shortener</h1>
+      <form onSubmit={handleSubmit}>
+        <label>
+          Original URL:
+          <input
+            type="url"
+            value={originalUrl}
+            onChange={(e) => setOriginalUrl(e.target.value)}
+            required
+          />
+        </label>
+        <button type="submit">Shorten</button>
       </form>
-      {shortenedUrl && (
+      {shortUrl && (
         <div>
-          <p>
-            Shortened URL:{' '}
-            <a
-              href={`${process.env.REACT_APP_API_URL}/${shortenedUrl}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {`${process.env.REACT_APP_API_URL}/${shortenedUrl}`}
-            </a>
-          </p>
+          <p>Short URL:</p>
+          <a href={`${process.env.REACT_APP_API_URL}/${shortUrl}`} target="_blank" rel="noopener noreferrer">
+            {`${process.env.REACT_APP_API_URL}/${shortUrl}`}
+          </a>
         </div>
       )}
-
-      {error && <p>{error}</p>}
-
-      <div className="nav-buttons">
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+        <div className="nav-buttons">
         <Link to="/dashboard">
           <button>Go to Dashboard</button>
         </Link>
