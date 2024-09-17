@@ -10,7 +10,6 @@ const ShortenForm = () => {
   const [monthlyCount, setMonthlyCount] = useState(0);
 
   useEffect(() => {
-    // Fetch initial URL counts for today and this month
     const fetchCounts = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -53,7 +52,6 @@ const ShortenForm = () => {
       setDailyCount((prev) => prev + 1);
       setMonthlyCount((prev) => prev + 1);
 
-      // Update the URL list table with the new entry (if this API exists)
       const updateUrlList = async () => {
         try {
           await axios.post(
@@ -87,11 +85,9 @@ const ShortenForm = () => {
     <div className="container">
       <h2>Shorten URL</h2>
 
-      {/* Show the counts */}
       <p>Total URLs created today: {dailyCount}</p>
       <p>Total URLs created this month: {monthlyCount}</p>
 
-      {/* Form for shortening the URL */}
       <form onSubmit={handleShorten}>
         <input
           type="text"
