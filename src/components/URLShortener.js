@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 
-const ShortenForm = () => {
+const URLShortener = () => {
   const [originalUrl, setOriginalUrl] = useState('');
   const [shortenedUrl, setShortenedUrl] = useState('');
   const [error, setError] = useState('');
@@ -24,7 +24,7 @@ const ShortenForm = () => {
         setDailyCount(response.data.dailyCount);
         setMonthlyCount(response.data.monthlyCount);
       } catch (err) {
-        console.error('Error fetching counts:', err);
+        console.error('Error fetching counts', err);
         setError('Error fetching counts');
       }
     };
@@ -37,7 +37,7 @@ const ShortenForm = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/shorten-url`,
+        `${process.env.REACT_APP_API_URL}/api/shorten`,
         { originalUrl },
         {
           headers: {
@@ -46,9 +46,9 @@ const ShortenForm = () => {
         }
       );
 
-      const { shortenedUrl } = response.data;
+      const { shortUrl } = response.data;
 
-      setShortenedUrl(shortenedUrl);
+      setShortenedUrl(shortUrl);
       setDailyCount((prev) => prev + 1);
       setMonthlyCount((prev) => prev + 1);
 
@@ -56,7 +56,7 @@ const ShortenForm = () => {
         try {
           await axios.post(
             `${process.env.REACT_APP_API_URL}/api/add-url-to-list`,
-            { originalUrl, shortenedUrl },
+            { originalUrl, shortUrl },
             {
               headers: {
                 Authorization: `Bearer ${token}`
@@ -64,12 +64,12 @@ const ShortenForm = () => {
             }
           );
         } catch (err) {
-          console.error('Error updating URL list:', err);
+          console.error('Error updating URL list', err);
           setError('Error updating URL list');
         }
       };
 
-      await updateUrlList();
+      updateUrlList();
     } catch (err) {
       console.error('Error shortening URL:', err);
       setError(err.response?.data?.error || 'Error shortening URL');
@@ -78,7 +78,7 @@ const ShortenForm = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    window.location.href = '/';
+    window.location.href = '/'; 
   };
 
   return (
@@ -88,6 +88,7 @@ const ShortenForm = () => {
       <p>Total URLs created today: {dailyCount}</p>
       <p>Total URLs created this month: {monthlyCount}</p>
 
+      {/* Form for shortening the URL */}
       <form onSubmit={handleShorten}>
         <input
           type="text"
@@ -98,7 +99,6 @@ const ShortenForm = () => {
         />
         <button type="submit">Shorten URL</button>
       </form>
-
       {shortenedUrl && (
         <div>
           <p>
@@ -129,4 +129,4 @@ const ShortenForm = () => {
   );
 };
 
-export default ShortenForm;
+export default URLShortener;
