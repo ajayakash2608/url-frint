@@ -14,7 +14,7 @@ const ShortenForm = () => {
       try {
         const token = localStorage.getItem('token');
         const response = await axios.get(
-          `${process.env.REACT_APP_API_BASE_URL}/api/url-counts`,
+          `${process.env.REACT_APP_API_URL}/api/url-counts`,
           {
             headers: {
               Authorization: `Bearer ${token}`
@@ -24,7 +24,7 @@ const ShortenForm = () => {
         setDailyCount(response.data.dailyCount);
         setMonthlyCount(response.data.monthlyCount);
       } catch (err) {
-        console.error('Error fetching counts', err);
+        console.error('Error fetching counts:', err);
         setError('Error fetching counts');
       }
     };
@@ -37,7 +37,7 @@ const ShortenForm = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL}/api/shorten-url`,
+        `${process.env.REACT_APP_API_URL}/api/shorten-url`,
         { originalUrl },
         {
           headers: {
@@ -46,30 +46,21 @@ const ShortenForm = () => {
         }
       );
 
-      const { shortenedUrl } = response.data; 
+      const { shortenedUrl } = response.data;
 
       setShortenedUrl(shortenedUrl);
-      setDailyCount((prev) => prev + 1);
-      setMonthlyCount((prev) => prev + 1);
+      setDailyCount(prev => prev + 1);
+      setMonthlyCount(prev => prev + 1);
 
-      const updateUrlList = async () => {
-        try {
-          await axios.post(
-            `${process.env.REACT_APP_API_BASE_URL}/api/add-url-to-list`,
-            { originalUrl, shortenedUrl },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            }
-          );
-        } catch (err) {
-          console.error('Error updating URL list', err);
-          setError('Error updating URL list');
+      await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/add-url-to-list`,
+        { originalUrl, shortenedUrl },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
-      };
-
-      updateUrlList();
+      );
     } catch (err) {
       console.error('Error shortening URL:', err);
       setError(err.response?.data?.error || 'Error shortening URL');
@@ -78,7 +69,7 @@ const ShortenForm = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    window.location.href = '/'; 
+    window.location.href = '/';
   };
 
   return (
@@ -88,7 +79,6 @@ const ShortenForm = () => {
       <p>Total URLs created today: {dailyCount}</p>
       <p>Total URLs created this month: {monthlyCount}</p>
 
-      {/* Form for shortening the URL */}
       <form onSubmit={handleShorten}>
         <input
           type="text"
@@ -99,16 +89,17 @@ const ShortenForm = () => {
         />
         <button type="submit">Shorten URL</button>
       </form>
+
       {shortenedUrl && (
         <div>
           <p>
             Shortened URL:{' '}
             <a
-              href={`${process.env.REACT_APP_API_BASE_URL}/${shortenedUrl}`}
+              href={`${process.env.REACT_APP_API_URL}/${shortenedUrl}`}
               target="_blank"
               rel="noopener noreferrer"
             >
-              {`${process.env.REACT_APP_API_BASE_URL}/${shortenedUrl}`}
+              {`${process.env.REACT_APP_API_URL}/${shortenedUrl}`}
             </a>
           </p>
         </div>
