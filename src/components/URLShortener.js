@@ -10,6 +10,7 @@ const ShortenForm = () => {
   const [monthlyCount, setMonthlyCount] = useState(0);
 
   useEffect(() => {
+    // Fetch initial URL counts for today and this month
     const fetchCounts = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -49,18 +50,28 @@ const ShortenForm = () => {
       const { shortenedUrl } = response.data;
 
       setShortenedUrl(shortenedUrl);
-      setDailyCount(prev => prev + 1);
-      setMonthlyCount(prev => prev + 1);
+      setDailyCount((prev) => prev + 1);
+      setMonthlyCount((prev) => prev + 1);
 
-      await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/add-url-to-list`,
-        { originalUrl, shortenedUrl },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+      // Update the URL list table with the new entry (if this API exists)
+      const updateUrlList = async () => {
+        try {
+          await axios.post(
+            `${process.env.REACT_APP_API_URL}/api/add-url-to-list`,
+            { originalUrl, shortenedUrl },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            }
+          );
+        } catch (err) {
+          console.error('Error updating URL list:', err);
+          setError('Error updating URL list');
         }
-      );
+      };
+
+      await updateUrlList();
     } catch (err) {
       console.error('Error shortening URL:', err);
       setError(err.response?.data?.error || 'Error shortening URL');
@@ -76,9 +87,11 @@ const ShortenForm = () => {
     <div className="container">
       <h2>Shorten URL</h2>
 
+      {/* Show the counts */}
       <p>Total URLs created today: {dailyCount}</p>
       <p>Total URLs created this month: {monthlyCount}</p>
 
+      {/* Form for shortening the URL */}
       <form onSubmit={handleShorten}>
         <input
           type="text"
