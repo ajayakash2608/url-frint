@@ -11,12 +11,17 @@ const URLShortener = () => {
     setError('');
 
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No token found. Please login.');
+      }
+
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/shorten`, // Ensure /api/shorten matches your backend route
+        `${process.env.REACT_APP_API_URL}/api/shorten`,
         { originalUrl },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}` // Ensure token is set if required
+            Authorization: `Bearer ${token}`
           }
         }
       );
