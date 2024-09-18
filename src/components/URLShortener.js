@@ -10,12 +10,13 @@ const URLShortener = () => {
     e.preventDefault();
     setError('');
 
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No token found. Please login.');
-      }
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('No token found. Please login.');
+      return;
+    }
 
+    try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/shorten`,
         { originalUrl },
