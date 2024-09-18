@@ -6,28 +6,26 @@ const Dashboard = () => {
   const [totalUrlsMonth, setTotalUrlsMonth] = useState(0);
 
   useEffect(() => {
-    const fetchUrlStats = async () => {
-      try {
-        // Fetch URLs from the backend API
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/urls`);
-        const urls = await response.json();
+    const updateUrlCounts = () => {
+      const urls = JSON.parse(localStorage.getItem('urls')) || [];
 
-        // Get today's date and the start of the current month
-        const today = new Date().toISOString().split('T')[0];
-        const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+      const today = new Date().toISOString().split('T')[0];
+      const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
 
-        // Filter the URLs for today's and this month's counts
-        const urlsToday = urls.filter(url => url.date.startsWith(today)).length;
-        const urlsMonth = urls.filter(url => url.date >= startOfMonth).length;
+      const urlsToday = urls.filter(url => url.date.startsWith(today)).length;
+      const urlsMonth = urls.filter(url => url.date >= startOfMonth).length;
 
-        setTotalUrlsToday(urlsToday);
-        setTotalUrlsMonth(urlsMonth);
-      } catch (error) {
-        console.error('Error fetching URL stats:', error);
-      }
+      setTotalUrlsToday(urlsToday);
+      setTotalUrlsMonth(urlsMonth);
     };
 
-    fetchUrlStats();
+    updateUrlCounts();
+
+    window.addEventListener('storage', updateUrlCounts);
+
+    return () => {
+      window.removeEventListener('storage', updateUrlCounts);
+    };
   }, []);
 
   return (
