@@ -7,6 +7,7 @@ import ResetPassword from './components/ResetPassword';
 import URLShortener from './components/URLShortener';
 import Dashboard from './components/Dashboard';
 import ViewUrls from './components/ViewUrls';
+import Redirect from './components/Redirect';
 
 
 function App() {
@@ -19,7 +20,8 @@ function App() {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/urlshortener" element={<URLShortener />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/urls" element={<ViewUrls />} />
+        <Route path="/view-urls" element={<ViewUrls />} />
+        <Route path="/redirect/:shortUrl" element={<Redirect />} />
       </Routes>
     </Router>
   );
