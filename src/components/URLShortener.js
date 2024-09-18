@@ -1,68 +1,46 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-
-const UrlShortener = () => {
-  const [longUrl, setLongUrl] = useState('');
+const URLShortener = () => {
+  const [originalUrl, setOriginalUrl] = useState('');
   const [shortUrl, setShortUrl] = useState('');
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/shorten`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ longUrl }),
-      });
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/shorten`,
+        { originalUrl },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
 
-      const data = await response.json();
-      setShortUrl(data.shortUrl); // Get the shortened URL from the backend
-
-      // Optionally, save the result in localStorage
-      const urls = JSON.parse(localStorage.getItem('urls')) || [];
-      urls.push({ longUrl, shortUrl: data.shortUrl, date: data.date });
-      localStorage.setItem('urls', JSON.stringify(urls));
-
+      setShortUrl(response.data.shortUrl);
     } catch (error) {
       console.error('Error shortening URL:', error);
     }
   };
 
-  const handleRedirect = () => {
-    // Navigate to the URL based on shortUrl
-    navigate(`/redirect/${shortUrl}`);
-  };
-
   return (
-    <div className="url-shortener">
+    <div>
       <h1>URL Shortener</h1>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
+          value={originalUrl}
+          onChange={(e) => setOriginalUrl(e.target.value)}
           placeholder="Enter URL"
-          value={longUrl}
-          onChange={(e) => setLongUrl(e.target.value)}
           required
         />
-        <button type="submit">Shorten</button>
+        <button type="submit">Shorten URL</button>
       </form>
-      {shortUrl && (
-        <div className="result">
-          <p>Shortened URL:</p>
-          <button onClick={handleRedirect}>
-            {`short.ly/${shortUrl}`}
-          </button>
-        </div>
-      )}
-      <br />
-      <Link to="/dashboard"><button>Dashboard</button></Link><br /><br />
-      <Link to="/view-all"><button>View All URLs</button></Link>
+      {shortUrl && <p>Short URL: {shortUrl}</p>}
     </div>
   );
 };
 
-export default UrlShortener;
+export default URLShortener;
