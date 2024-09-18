@@ -5,18 +5,8 @@ const ViewUrls = () => {
   const [urls, setUrls] = useState([]);
 
   useEffect(() => {
-    const fetchUrls = async () => {
-      try {
-        // Fetch URLs from the backend API
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/urls`);
-        const data = await response.json();
-        setUrls(data);
-      } catch (error) {
-        console.error('Error fetching URLs:', error);
-      }
-    };
-
-    fetchUrls();
+    const storedUrls = JSON.parse(localStorage.getItem('urls')) || [];
+    setUrls(storedUrls);
   }, []);
 
   return (
@@ -35,7 +25,7 @@ const ViewUrls = () => {
             <tr key={index}>
               <td>{url.longUrl}</td>
               <td><a href={`https://${url.shortUrl}`} target="_blank" rel="noopener noreferrer">{url.shortUrl}</a></td>
-              <td>{new Date(url.date).toLocaleString()}</td>
+              <td>{url.date}</td>
             </tr>
           ))}
         </tbody>
@@ -48,4 +38,3 @@ const ViewUrls = () => {
 };
 
 export default ViewUrls;
-
