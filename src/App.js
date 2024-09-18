@@ -20,7 +20,7 @@ function App() {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/urlshortener" element={<URLShortener />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/view-urls" element={<ViewUrls />} />
+        <Route path="/view-all" element={<ViewUrls />} />
         <Route path="/redirect/:shortUrl" element={<Redirect />} />
       </Routes>
     </Router>
