@@ -36,7 +36,7 @@ const Dashboard = () => {
       <p>Total URLs shortened today: {totalUrlsToday}</p>
       <p>Total URLs shortened this month: {totalUrlsMonth}</p>
       <br />
-      <Link to="/"><button>Home</button></Link><br /><br />
+      <Link to="/urlshortener"><button>Home</button></Link><br /><br />
       <Link to="/view-all"><button>ViewAllUrls</button></Link>
     </div>
   );
