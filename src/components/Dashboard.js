@@ -36,6 +36,7 @@ const Dashboard = () => {
       <br />
       <Link to="/urlshortener"><button>Home</button></Link><br /><br />
       <Link to="/view-all"><button>ViewAllUrls</button></Link>
+      <Link to="/"><button>Logut</button></Link>
     </div>
   );
 };
