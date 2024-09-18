@@ -1,47 +1,51 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
-function ViewUrls() {
+const ViewUrls = () => {
   const [urls, setUrls] = useState([]);
 
   useEffect(() => {
     const fetchUrls = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/urls`, {
-          headers: { Authorization: token },
-        });
-        setUrls(response.data);
+        // Fetch URLs from the backend API
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/urls`);
+        const data = await response.json();
+        setUrls(data);
       } catch (error) {
-        alert('Error fetching URLs');
+        console.error('Error fetching URLs:', error);
       }
     };
+
     fetchUrls();
   }, []);
 
   return (
     <div>
-      <h1>Your Shortened URLs</h1>
+      <h1>View All URLs</h1>
       <table>
         <thead>
           <tr>
             <th>Original URL</th>
             <th>Shortened URL</th>
-            <th>Date/Time</th>
+            <th>Date Time</th>
           </tr>
         </thead>
         <tbody>
-          {urls.map((url) => (
-            <tr key={url._id}>
-              <td>{url.originalUrl}</td>
-              <td><a href={url.shortUrl} target="_blank" rel="noopener noreferrer">{url.shortUrl}</a></td>
-              <td>{new Date(url.createdAt).toLocaleString()}</td>
+          {urls.map((url, index) => (
+            <tr key={index}>
+              <td>{url.longUrl}</td>
+              <td><a href={`https://${url.shortUrl}`} target="_blank" rel="noopener noreferrer">{url.shortUrl}</a></td>
+              <td>{new Date(url.date).toLocaleString()}</td>
             </tr>
           ))}
         </tbody>
       </table>
+      <br />
+      <Link to="/dashboard"><button>Dashboard</button></Link><br /><br />
+      <Link to="/view-all"><button>ViewAllUrls</button></Link>
     </div>
   );
-}
+};
 
 export default ViewUrls;
+
