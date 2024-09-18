@@ -50,6 +50,7 @@ const UrlShortener = () => {
       <br />
       <Link to="/dashboard"><button>Dashboard</button></Link><br /><br />
       <Link to="/view-all"><button>ViewAllUrls</button></Link>
+        <Link to="/"><button>Logut</button></Link>
     </div>
   );
 };
