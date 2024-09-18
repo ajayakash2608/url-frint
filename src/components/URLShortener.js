@@ -1,133 +1,68 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Link } from 'react-router-dom'; // Import Link
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import './UrlShortener.css'; // Optional, for styling
 
-const URLShortener = () => {
-  const [originalUrl, setOriginalUrl] = useState('');
-  const [shortenedUrl, setShortenedUrl] = useState('');
-  const [error, setError] = useState('');
-  const [dailyCount, setDailyCount] = useState(0);
-  const [monthlyCount, setMonthlyCount] = useState(0);
+const UrlShortener = () => {
+  const [longUrl, setLongUrl] = useState('');
+  const [shortUrl, setShortUrl] = useState('');
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchCounts = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/url-counts`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setDailyCount(response.data.dailyCount);
-        setMonthlyCount(response.data.monthlyCount);
-      } catch (err) {
-        console.error('Error fetching counts', err);
-        setError('Error fetching counts');
-      }
-    };
-
-    fetchCounts();
-  }, []);
-
-  const handleShorten = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/shorten-url`,
-        { originalUrl },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/shorten`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ longUrl }),
+      });
 
-      const { shortenedUrl } = response.data;
-      setShortenedUrl(shortenedUrl);
-      setDailyCount((prev) => prev + 1);
-      setMonthlyCount((prev) => prev + 1);
+      const data = await response.json();
+      setShortUrl(data.shortUrl); // Get the shortened URL from the backend
 
-      await updateUrlList(originalUrl, shortenedUrl);
-    } catch (err) {
-      console.error('Error shortening URL:', err);
-      setError(err.response?.data?.error || 'Error shortening URL');
+      // Optionally, save the result in localStorage
+      const urls = JSON.parse(localStorage.getItem('urls')) || [];
+      urls.push({ longUrl, shortUrl: data.shortUrl, date: data.date });
+      localStorage.setItem('urls', JSON.stringify(urls));
+
+    } catch (error) {
+      console.error('Error shortening URL:', error);
     }
   };
 
-  const updateUrlList = async (originalUrl, shortenedUrl) => {
-    try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/add-url-to-list`,
-        { originalUrl, shortenedUrl },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-    } catch (err) {
-      console.error('Error updating URL list', err);
-      setError('Error updating URL list');
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/login'; // Ensure handleLogout is defined
+  const handleRedirect = () => {
+    // Navigate to the URL based on shortUrl
+    navigate(`/redirect/${shortUrl}`);
   };
 
   return (
-    <div className="container">
-      <h2>Shorten URL</h2>
-
-      <p>Total URLs created today: {dailyCount}</p>
-      <p>Total URLs created this month: {monthlyCount}</p>
-
-      <form onSubmit={handleShorten}>
+    <div className="url-shortener">
+      <h1>URL Shortener</h1>
+      <form onSubmit={handleSubmit}>
         <input
           type="text"
-          value={originalUrl}
-          onChange={(e) => setOriginalUrl(e.target.value)}
-          placeholder="Enter the long URL"
+          placeholder="Enter URL"
+          value={longUrl}
+          onChange={(e) => setLongUrl(e.target.value)}
           required
         />
-        <button type="submit">Shorten URL</button>
+        <button type="submit">Shorten</button>
       </form>
-
-      {shortenedUrl && (
-        <div>
-          <p>
-            Shortened URL:{' '}
-            <a
-              href={`${process.env.REACT_APP_API_URL}/${shortenedUrl}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {`${process.env.REACT_APP_API_URL}/${shortenedUrl}`}
-            </a>
-          </p>
+      {shortUrl && (
+        <div className="result">
+          <p>Shortened URL:</p>
+          <button onClick={handleRedirect}>
+            {`short.ly/${shortUrl}`}
+          </button>
         </div>
       )}
-
-      {error && <p className="error">{error}</p>}
-
-      <div className="nav-buttons">
-        <Link to="/dashboard">
-          <button>Go to Dashboard</button>
-        </Link>
-        <Link to="/urls">
-          <button>View All URLs</button>
-        </Link>
-        <button onClick={handleLogout}>Logout</button>
-      </div>
+      <br />
+      <Link to="/dashboard"><button>Dashboard</button></Link><br /><br />
+      <Link to="/view-all"><button>View All URLs</button></Link>
     </div>
   );
 };
 
-export default URLShortener;
+export default UrlShortener;
